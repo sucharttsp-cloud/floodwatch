@@ -233,7 +233,7 @@ const Core = (() => {
 
   function analyze(raw) {
     const now = raw.at;
-    const vm = { at: now, roads: [], rivers: [], rain: [], forecast: null, tide: null, errors: raw.errors || [] };
+    const vm = { at: now, roads: [], rivers: [], rain: [], forecast: null, tide: null, errors: raw.errors || [], reused: raw.reused || [] };
 
     // น้ำทะเลหนุน: จุดสูง/ต่ำ และตอนนี้กำลังขึ้นหรือลง
     if (raw.tide && raw.tide.length > 3) {
@@ -544,8 +544,13 @@ window.__SNAPSHOT__ = /*SNAPSHOT*/null/*END*/;
       banner.hidden = false;
       banner.textContent = `ข้อมูลชุดนี้ดึงไว้เมื่อ ${dayHm(vm.at)} อาจไม่ใช่สถานการณ์ตอนนี้ ดูค่าล่าสุดได้ที่ลิงก์ ระบบตรวจวัดน้ำท่วมถนน กทม. ท้ายหน้า`;
     } else if (vm.errors.length) {
+      const names = { bma: "เซ็นเซอร์ถนน กทม.", tw: "ระดับน้ำ ThaiWater", rain: "ฝน ThaiWater", forecast: "ฝนคาดการณ์", tide: "น้ำทะเลหนุน" };
+      const failed = vm.errors.map(e => e.split(":")[0]);
+      const limited = vm.errors.some(e => /429/.test(e));
+      const reused = vm.reused || [];
       banner.hidden = false;
-      banner.textContent = "บางแหล่งดึงข้อมูลไม่ได้รอบนี้ ส่วนที่เหลือยังแสดงตามปกติ";
+      banner.textContent = `รอบนี้ดึง${failed.map(k => names[k] || k).join(", ")}ไม่ได้${limited ? " (ต้นทางจำกัดจำนวนครั้ง รอสักพักจะกลับมาเอง)" : ""}` +
+        (reused.length ? ` · แสดงค่าล่าสุดที่เคยดึงได้แทน ดูเวลาวัดที่แต่ละแถว` : " · ส่วนที่เหลือยังแสดงตามปกติ");
     } else banner.hidden = true;
   }
 
@@ -560,21 +565,36 @@ window.__SNAPSHOT__ = /*SNAPSHOT*/null/*END*/;
     finally { clearTimeout(to); }
   };
 
+  // ส่วนไหนดึงไม่ได้รอบนี้ (เช่น ThaiWater ตอบ 429 เพราะถูกจำกัดจำนวนครั้ง) ใช้ค่าล่าสุดที่เคยดึงได้แทน
+  // ค่าเก่ามีเวลาวัดของมันเอง ถ้าเกิน 1 ชม. หน้าจะขึ้น "ข้อมูลค้าง" ตามปกติ
+  const PARTS = ["bma", "tw", "rain", "forecast", "tide"], CACHE_KEY = "floodwatch.last";
+  let last = null;
+  try { last = JSON.parse(localStorage.getItem(CACHE_KEY) || "null"); } catch (e) { last = null; }
+
   async function load() {
     $("refreshBtn").hidden = true;
     let raw = null;
     try {
       raw = await Core.collect(getJson);
-      const got = ["bma", "tw", "rain", "forecast", "tide"].filter(k => raw[k]).length;
-      if (got < 2) raw = null; // ดึงสดไม่ได้ (เช่นเปิดใน Artifact) → ใช้ภาพนิ่ง
+      const got = PARTS.filter(k => raw[k]).length;
+      if (got === 0) raw = null; // ดึงสดไม่ได้เลย (เช่นเปิดใน Artifact) → ใช้ภาพนิ่ง
     } catch (e) { raw = null; }
-    if (raw) { render(raw, "live"); $("refreshBtn").hidden = false; return true; }
+    if (raw) {
+      raw.reused = [];
+      for (const k of PARTS) {
+        if (raw[k]) continue;
+        if (last && last[k]) { raw[k] = last[k]; raw.reused.push(k); }
+      }
+      last = {}; for (const k of PARTS) if (raw[k]) last[k] = raw[k];
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(last)); } catch (e) { /* โหมดส่วนตัว/พื้นที่เต็ม: ข้ามไป */ }
+      render(raw, "live"); $("refreshBtn").hidden = false; return true;
+    }
     if (window.__SNAPSHOT__) { render(window.__SNAPSHOT__, "snapshot"); return false; }
     $("statusWord").textContent = "ดึงข้อมูลไม่ได้";
     return false;
   }
 
   $("refreshBtn").addEventListener("click", load);
-  load().then(live => { if (live) setInterval(load, 5 * 60e3); });
+  load().then(live => { if (live) setInterval(load, 10 * 60e3); });
 })();
 </script>
