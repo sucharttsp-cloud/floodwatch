@@ -1,0 +1,580 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>น้ำรอบบ้าน สุขสวัสดิ์ 64</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#EBF0F1; --surface:#FFFFFF; --ink:#13232B; --muted:#5A6D75; --line:#CFD9DC;
+  --accent:#0F6E7A; --accent-soft:#D3E8EA; --tide:#0F6E7A; --gauge:#13232B;
+  --ok:#2E7D4F; --ok-soft:#DCEFE3; --watch:#A86F00; --watch-soft:#FBEBC8; --alert:#C2362B; --alert-soft:#F8DCD8;
+  --stale:#7A858A; --stale-soft:#E3E7E8;
+  --display:"Chakra Petch","IBM Plex Sans Thai",system-ui,sans-serif;
+  --body:"IBM Plex Sans Thai",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#0D171C; --surface:#14222A; --ink:#E2EBED; --muted:#93A6AD; --line:#26363E;
+    --accent:#5BBAC5; --accent-soft:#173840; --tide:#5BBAC5; --gauge:#E2EBED;
+    --ok:#5FC08A; --ok-soft:#163427; --watch:#E8B44A; --watch-soft:#3A2D10; --alert:#F0776B; --alert-soft:#3D1A17;
+    --stale:#8E999E; --stale-soft:#222D32;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0D171C; --surface:#14222A; --ink:#E2EBED; --muted:#93A6AD; --line:#26363E;
+  --accent:#5BBAC5; --accent-soft:#173840; --tide:#5BBAC5; --gauge:#E2EBED;
+  --ok:#5FC08A; --ok-soft:#163427; --watch:#E8B44A; --watch-soft:#3A2D10; --alert:#F0776B; --alert-soft:#3D1A17;
+  --stale:#8E999E; --stale-soft:#222D32;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55}
+.wrap{max-width:680px;margin:0 auto;padding-inline:16px;padding-block:20px 40px;display:flex;flex-direction:column;gap:22px}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums}
+header.top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+header.top h1{font-family:var(--display);font-size:1.15rem;font-weight:600;margin:0;letter-spacing:.01em}
+header.top .where{color:var(--muted);font-size:.85rem}
+.status{border-radius:14px;padding:18px 18px 16px;background:var(--stale-soft);display:flex;flex-direction:column;gap:10px}
+.status[data-level="ok"]{background:var(--ok-soft)} .status[data-level="watch"]{background:var(--watch-soft)} .status[data-level="alert"]{background:var(--alert-soft)}
+.status .word{font-family:var(--display);font-size:2rem;font-weight:700;line-height:1.1;display:flex;align-items:center;gap:12px;text-wrap:balance}
+.status .dot{width:16px;height:16px;border-radius:50%;flex:none;background:var(--stale)}
+.status[data-level="ok"] .dot{background:var(--ok)} .status[data-level="watch"] .dot{background:var(--watch)} .status[data-level="alert"] .dot{background:var(--alert)}
+.status ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.status li{padding-left:18px;position:relative}
+.status li::before{content:"";position:absolute;left:2px;top:.7em;width:7px;height:2px;background:var(--ink);opacity:.5}
+.status .meta{font-size:.8rem;color:var(--muted)}
+.banner{font-size:.85rem;padding:10px 12px;border-radius:10px;background:var(--watch-soft);color:var(--ink)}
+.banner[hidden]{display:none}
+section h2{font-family:var(--display);font-size:1rem;font-weight:600;margin:0 0 4px;letter-spacing:.02em;text-transform:none}
+section .sub{color:var(--muted);font-size:.83rem;margin:0 0 10px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.row{display:grid;grid-template-columns:1fr auto;gap:4px 14px;padding:12px 14px;border-top:1px solid var(--line);align-items:center}
+.row:first-child{border-top:0}
+.row .name{font-weight:500;line-height:1.35}
+.row .info{grid-column:1/2;font-size:.8rem;color:var(--muted)}
+.row .val{grid-row:1/3;grid-column:2;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.row .big{font-family:var(--display);font-size:1.45rem;font-weight:600;font-variant-numeric:tabular-nums;line-height:1}
+.row .big small{font-size:.75rem;font-weight:500;color:var(--muted);margin-left:2px}
+.row .spark{grid-column:1/3}
+.delta{font-family:var(--display);font-size:.85rem;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.delta.up{color:var(--alert)} .delta.down{color:var(--ok)} .delta.flat{color:var(--muted)} .delta.stale{color:var(--stale)}
+.tag{display:inline-block;font-size:.72rem;padding:1px 8px;border-radius:999px;background:var(--stale-soft);color:var(--ink);margin-top:4px}
+.tag.ok{background:var(--ok-soft)} .tag.watch{background:var(--watch-soft)} .tag.alert{background:var(--alert-soft)}
+.gaugebar{grid-column:1/3;height:8px;border-radius:4px;background:var(--line);position:relative;margin-top:4px}
+.gaugebar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--accent)}
+.gaugebar b{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--alert)}
+svg{display:block;width:100%;height:auto}
+svg text{fill:var(--muted);font-family:var(--body);font-size:12px}
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 10px 8px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.78rem;color:var(--muted);padding:4px 6px 0}
+.legend span::before{content:"";display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:6px;background:var(--c)}
+.tides{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tides div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:.8rem}
+.tides b{font-family:var(--display);font-size:1rem;font-weight:600}
+.forecast{display:flex;gap:3px;align-items:flex-end;height:48px;padding:0 14px 6px}
+.forecast i{flex:1;background:var(--accent);border-radius:2px 2px 0 0;min-height:2px;opacity:.85}
+.forecast i.past{background:var(--muted);opacity:.5}
+footer{font-size:.78rem;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+footer p{margin:0}
+button.refresh{font:inherit;font-size:.8rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:4px 10px;cursor:pointer}
+.loading{color:var(--muted);padding:16px 14px}
+.camlink{font-weight:600;font-size:.9rem;text-decoration:none;border-top:1px solid color-mix(in srgb,var(--ink) 15%,transparent);padding-top:10px}
+.camlink:hover{text-decoration:underline}
+@media (max-width:420px){.status .word{font-size:1.7rem}}
+@media (prefers-reduced-motion:no-preference){.status{transition:background .3s}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>น้ำรอบบ้าน · สุขสวัสดิ์ 64</h1>
+    <span class="where">พระประแดง–ทุ่งครุ · ริมเจ้าพระยาช่วงปากแม่น้ำ</span>
+  </header>
+
+  <div class="status" id="status" data-level="stale" aria-live="polite">
+    <div class="word"><span class="dot"></span><span id="statusWord">กำลังโหลด…</span></div>
+    <ul id="summary"></ul>
+    <div class="meta"><span id="updated"></span> <button class="refresh" id="refreshBtn" type="button" hidden>โหลดใหม่</button></div>
+    <a class="camlink" href="https://world.tehx.dyndns.info/flood" target="_blank" rel="noopener">ดูภาพกล้องจริงแถวประชาอุทิศ ซ.75 →</a>
+    <span class="meta">เปิดหน้า JK World แล้วกดแท็บ “ย่านของฉัน” หรือเลือกเขตทุ่งครุ</span>
+  </div>
+  <div class="banner" id="banner" hidden></div>
+
+  <section>
+    <h2>น้ำทะเลหนุน กับ ระดับน้ำจริงใกล้บ้าน</h2>
+    <p class="sub">เส้นทึบคือน้ำทะเลหนุนที่ปากแม่น้ำ (คาดการณ์) จุดคือระดับที่วัดได้จริงที่ประตูน้ำใกล้บ้าน ถ้าจุดขึ้นตามเส้น แปลว่าขึ้นตามน้ำหนุนปกติ</p>
+    <div class="chart"><div id="tideChart" class="loading">กำลังโหลด…</div>
+      <div class="legend" id="tideLegend"></div></div>
+    <div class="tides" id="tideTimes"></div>
+  </section>
+
+  <section>
+    <h2>น้ำบนถนนใกล้บ้าน</h2>
+    <p class="sub">เซ็นเซอร์ของ กทม. · บนถนนสุขสวัสดิ์ไม่มีเซ็นเซอร์ ตัวเลขเป็นของจุดใกล้เคียง</p>
+    <div class="panel" id="roads"><div class="loading">กำลังโหลด…</div></div>
+  </section>
+
+  <section>
+    <h2>แม่น้ำและคลองใกล้บ้าน</h2>
+    <p class="sub">สถานีวัดระดับน้ำของ ThaiWater · เทียบกับตลิ่งด้านที่ต่ำกว่า</p>
+    <div class="panel" id="rivers"><div class="loading">กำลังโหลด…</div></div>
+  </section>
+
+  <section>
+    <h2>ฝน</h2>
+    <p class="sub">ฝนที่วัดได้จริงรายชั่วโมง และฝนคาดการณ์ที่บ้านทุก 15 นาที</p>
+    <div class="panel" id="rain"><div class="loading">กำลังโหลด…</div></div>
+  </section>
+
+  <footer>
+    <p>ข้อมูล: <a href="https://floodbangkok.bangkok.go.th" target="_blank" rel="noopener">ระบบตรวจวัดน้ำท่วมถนน กทม.</a> · <a href="https://www.thaiwater.net" target="_blank" rel="noopener">ThaiWater (สสน.)</a> · <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a> (ฝนคาดการณ์ · น้ำทะเลหนุน) · ดูภาพรวมทั้งกรุงเทพฯ ที่ <a href="https://world.tehx.dyndns.info/flood" target="_blank" rel="noopener">JK World</a></p>
+    <p>น้ำทะเลหนุนเป็นค่าคาดการณ์ที่ปากแม่น้ำ แถวบ้านจะขึ้นสูงสุดช้ากว่าเล็กน้อย · ค่าเซ็นเซอร์ถนนเป็นของจุดติดตั้งเท่านั้น</p>
+  </footer>
+</div>
+
+<script id="core">
+const Core = (() => {
+  const HOME = { lat: 13.648, lng: 100.517 };
+  const MOUTH = { lat: 13.5, lng: 100.55 };
+  const BMA = "https://floodbangkok.bangkok.go.th/bkk/dds/services/api/floods/v1";
+  const TW = "https://api-v3.thaiwater.net/api/v1/thaiwater30/public";
+  const H = 3600e3;
+
+  function km(a, b) {
+    const R = 6371, r = x => x * Math.PI / 180;
+    const dLa = r(b.lat - a.lat), dLo = r(b.lng - a.lng);
+    const h = Math.sin(dLa / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dLo / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+  function bearing(a, b) {
+    const r = x => x * Math.PI / 180;
+    const y = Math.sin(r(b.lng - a.lng)) * Math.cos(r(b.lat));
+    const x = Math.cos(r(a.lat)) * Math.sin(r(b.lat)) - Math.sin(r(a.lat)) * Math.cos(r(b.lat)) * Math.cos(r(b.lng - a.lng));
+    const deg = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+    return ["เหนือ", "ตะวันออกเฉียงเหนือ", "ตะวันออก", "ตะวันออกเฉียงใต้", "ใต้", "ตะวันตกเฉียงใต้", "ตะวันตก", "ตะวันตกเฉียงเหนือ"][Math.round(deg / 45) % 8];
+  }
+  // "2026-10-01 17:20" (เวลาไทย) -> ms
+  const twTime = s => Date.parse(s.replace(" ", "T") + ":00+07:00");
+  const ymd = ms => new Date(ms + 7 * H).toISOString().slice(0, 10);
+
+  // ดึงข้อมูลดิบทั้งหมด (ใช้ทั้งในหน้าเว็บและตอนสร้างภาพนิ่ง)
+  async function collect(getJson, now = Date.now()) {
+    const out = { at: now, home: HOME, errors: [] };
+    const safe = async (key, fn) => { try { out[key] = await fn(); } catch (e) { out.errors.push(key + ": " + (e && e.message || e)); } };
+
+    await Promise.all([
+      safe("bma", async () => {
+        const prof = (await getJson(`${BMA}/items/sensor_profile?limit=-1&fields=code,name,road,district,lat,long,device_status`)).data;
+        const near = prof.filter(p => p.code.startsWith("FL.") && p.lat)
+          .map(p => ({ ...p, km: km(HOME, { lat: p.lat, lng: p.long }) }))
+          .sort((a, b) => a.km - b.km).slice(0, 4);
+        const since = new Date(now - 6 * H).toISOString();
+        const hist = (await getJson(`${BMA}/items/sensor_flood?limit=-1&sort=date_created&fields=sensor_name,value,timestamp&filter[sensor_name][_in]=${near.map(n => n.code).join(",")}&filter[date_created][_gte]=${since}`)).data;
+        return { near, hist };
+      }),
+      safe("tw", async () => {
+        const [a, b] = await Promise.all([10, 11].map(p => getJson(`${TW}/waterlevel_load?province_code=${p}`)));
+        const all = [...a.waterlevel_data.data, ...b.waterlevel_data.data];
+        const near = all.filter(x => x.station && x.station.tele_station_lat)
+          .map(x => ({
+            id: x.station.id, name: x.station.tele_station_name.th, lat: x.station.tele_station_lat, lng: x.station.tele_station_long,
+            bank: x.station.min_bank, leftBank: x.station.left_bank, rightBank: x.station.right_bank,
+            level: x.waterlevel_msl == null ? null : +x.waterlevel_msl, time: x.waterlevel_datetime, situation: x.situation_level,
+            km: km(HOME, { lat: x.station.tele_station_lat, lng: x.station.tele_station_long })
+          }))
+          .sort((p, q) => p.km - q.km).slice(0, 3);
+        const start = ymd(now - 24 * H), end = ymd(now);
+        await Promise.all(near.map(async s => {
+          try {
+            const g = await getJson(`${TW}/waterlevel_graph?station_type=tele_waterlevel&station_id=${s.id}&start_date=${start}&end_date=${end}`);
+            s.graph = (g.data.graph_data || []).filter(p => p.value != null).map(p => [twTime(p.datetime), p.value]);
+          } catch (e) { s.graph = []; }
+        }));
+        return near;
+      }),
+      safe("rain", async () => {
+        const [a, b] = await Promise.all([10, 11].map(p => getJson(`${TW}/rain_24h?province_code=${p}`)));
+        const near = [...a.data, ...b.data].filter(x => x.station && x.station.tele_station_lat)
+          .map(x => ({
+            id: x.station.id, name: x.station.tele_station_name.th, r24: x.rain_24h, r1: x.rain_1h, time: x.rainfall_datetime,
+            km: km(HOME, { lat: x.station.tele_station_lat, lng: x.station.tele_station_long }),
+            lat: x.station.tele_station_lat, lng: x.station.tele_station_long
+          }))
+          .sort((p, q) => p.km - q.km).slice(0, 3);
+        await Promise.all(near.map(async s => {
+          try {
+            const g = await getJson(`${TW}/rain_24h_graph?station_id=${s.id}`);
+            s.hourly = (g.data || []).map(p => [twTime(p.rainfall_datetime), p.rainfall_value]).slice(-6);
+          } catch (e) { s.hourly = []; }
+        }));
+        return near;
+      }),
+      safe("forecast", async () => {
+        const f = await getJson(`https://api.open-meteo.com/v1/forecast?latitude=${HOME.lat}&longitude=${HOME.lng}&minutely_15=precipitation&past_minutely_15=8&forecast_minutely_15=12&timezone=Asia%2FBangkok`);
+        return f.minutely_15.time.map((t, i) => [Date.parse(t + ":00+07:00"), f.minutely_15.precipitation[i]]);
+      }),
+      safe("tide", async () => {
+        const m = await getJson(`https://marine-api.open-meteo.com/v1/marine?latitude=${MOUTH.lat}&longitude=${MOUTH.lng}&hourly=sea_level_height_msl&timezone=Asia%2FBangkok&past_days=1&forecast_days=2`);
+        return m.hourly.time.map((t, i) => [Date.parse(t + ":00+07:00"), m.hourly.sea_level_height_msl[i]]).filter(p => p[1] != null);
+      })
+    ]);
+    return out;
+  }
+
+  // ค่าที่ใกล้เวลา t ที่สุด (ภายใน tol)
+  function valueAt(series, t, tol = 15 * 60e3) {
+    let best = null, bd = Infinity;
+    for (const p of series) { const d = Math.abs(p[0] - t); if (d < bd) { bd = d; best = p; } }
+    return best && bd <= tol ? best[1] : null;
+  }
+
+  function analyze(raw) {
+    const now = raw.at;
+    const vm = { at: now, roads: [], rivers: [], rain: [], forecast: null, tide: null, errors: raw.errors || [] };
+
+    // น้ำทะเลหนุน: จุดสูง/ต่ำ และตอนนี้กำลังขึ้นหรือลง
+    if (raw.tide && raw.tide.length > 3) {
+      const s = raw.tide, ext = [];
+      for (let i = 1; i < s.length - 1; i++) {
+        if (s[i][1] > s[i - 1][1] && s[i][1] >= s[i + 1][1]) ext.push({ t: s[i][0], v: s[i][1], kind: "high" });
+        if (s[i][1] < s[i - 1][1] && s[i][1] <= s[i + 1][1]) ext.push({ t: s[i][0], v: s[i][1], kind: "low" });
+      }
+      const a = valueAt(s, now - 30 * 60e3, 45 * 60e3), b = valueAt(s, now + 30 * 60e3, 45 * 60e3);
+      vm.tide = { series: s, rising: a != null && b != null ? b > a : null, next: ext.filter(e => e.t > now).slice(0, 4), past: ext.filter(e => e.t <= now) };
+    }
+
+    if (raw.bma) {
+      for (const n of raw.bma.near) {
+        const series = raw.bma.hist.filter(h => h.sensor_name === n.code).map(h => [+h.timestamp, parseFloat(h.value)]).filter(p => !isNaN(p[1])).sort((a, b) => a[0] - b[0]);
+        const last = series[series.length - 1];
+        const stale = !last || now - last[0] > H;
+        const prev = last ? valueAt(series, last[0] - H) : null;
+        vm.roads.push({
+          code: n.code, name: n.name.replace(/\s*\*\s*$/, ""), road: n.road, district: n.district, km: n.km, dir: bearing(HOME, { lat: n.lat, lng: n.long }),
+          depth: last ? last[1] : null, time: last ? last[0] : null, d1h: !stale && prev != null ? last[1] - prev : null,
+          stale, broken: n.device_status && n.device_status !== "normal", series, peak: series.reduce((m, p) => Math.max(m, p[1]), 0)
+        });
+      }
+    }
+
+    // น้ำแถวบ้านขึ้นลงช้ากว่าปากแม่น้ำ: หาค่าหน่วงจากข้อมูลจริง 24 ชม. (ขยับทีละ 10 นาที หาจุดที่สัมพันธ์กันมากที่สุด)
+    const tideAt = t => {
+      const s = vm.tide && vm.tide.series; if (!s) return null;
+      for (let i = 1; i < s.length; i++) if (s[i][0] >= t) {
+        const [t0, v0] = s[i - 1], [t1, v1] = s[i];
+        return t < t0 ? null : v0 + (v1 - v0) * (t - t0) / (t1 - t0);
+      }
+      return null;
+    };
+    const lagOf = g => {
+      if (!vm.tide || g.length < 40) return null;
+      let best = null, bestR = 0.5;
+      for (let lag = 0; lag <= 240 * 60e3; lag += 10 * 60e3) {
+        const xs = [], ys = [];
+        for (const [t, v] of g) { const tv = tideAt(t - lag); if (tv != null) { xs.push(tv); ys.push(v); } }
+        if (xs.length < 30) continue;
+        const mx = xs.reduce((a, b) => a + b) / xs.length, my = ys.reduce((a, b) => a + b) / ys.length;
+        let sxy = 0, sxx = 0, syy = 0;
+        for (let i = 0; i < xs.length; i++) { sxy += (xs[i] - mx) * (ys[i] - my); sxx += (xs[i] - mx) ** 2; syy += (ys[i] - my) ** 2; }
+        const r = sxy / Math.sqrt(sxx * syy || 1);
+        if (r > bestR) { bestR = r; best = lag; }
+      }
+      return best;
+    };
+    const DEFAULT_LAG = 90 * 60e3;
+    const tideRisingAt = t => {
+      const a = tideAt(t - 30 * 60e3), b = tideAt(t + 30 * 60e3);
+      return a != null && b != null ? b > a : null;
+    };
+
+    if (raw.tw) {
+      for (const s of raw.tw) {
+        const g = s.graph || [];
+        const last = g.length ? g[g.length - 1] : (s.level != null ? [twTime(s.time), s.level] : null);
+        const stale = !last || now - last[0] > H;
+        const prev = last ? valueAt(g, last[0] - H) : null;
+        const d1h = !stale && prev != null ? Math.round((last[1] - prev) * 100) : null; // ซม.
+        const margin = last && s.bank != null ? Math.round((s.bank - last[1]) * 100) : null; // ซม. ถึงตลิ่ง
+        const fitted = lagOf(g);
+        const lag = fitted ?? DEFAULT_LAG;
+        const localRising = last ? tideRisingAt(last[0] - lag) : null;
+        let why = null;
+        if (d1h != null) {
+          if (Math.abs(d1h) < 2) why = { text: "ทรงตัว", cls: "" };
+          else if (d1h > 0 && localRising === true) why = { text: "ขึ้นตามน้ำทะเลหนุน (ปกติ)", cls: "ok" };
+          else if (d1h > 0 && localRising === false) why = { text: "ขึ้นทั้งที่น้ำทะเลกำลังลง — ผิดปกติ", cls: "alert" };
+          else if (d1h > 0) why = { text: "กำลังขึ้น", cls: "watch" };
+          else why = { text: "กำลังลด", cls: "ok" };
+        }
+        const eta = d1h > 1 && margin > 0 ? margin / d1h : null;
+        const highBank = s.leftBank != null && s.rightBank != null ? Math.max(s.leftBank, s.rightBank) : null;
+        vm.rivers.push({ id: s.id, lag: fitted, name: s.name, km: s.km, dir: bearing(HOME, s), level: last ? last[1] : null, time: last ? last[0] : null, bank: s.bank, highBank, margin, d1h, stale, why, eta, series: g, situation: s.situation });
+      }
+    }
+
+    // น้ำหนุนตามเวลาแถวบ้าน (ใช้ค่าหน่วงของสถานีแรกที่คำนวณได้)
+    if (vm.tide) {
+      const fit = vm.rivers.find(r => r.lag != null);
+      const lag = fit ? fit.lag : DEFAULT_LAG;
+      vm.tide.lag = lag; vm.tide.lagFitted = !!fit;
+      vm.tide.localRising = tideRisingAt(now - lag);
+      vm.tide.localNext = vm.tide.series.length ? vm.tide.next.concat(vm.tide.past).map(e => ({ ...e, t: e.t + lag })).filter(e => e.t > now).sort((a, b) => a.t - b.t) : [];
+    }
+
+    if (raw.rain) {
+      for (const s of raw.rain) {
+        const h = (s.hourly || []).filter(p => p[1] != null);
+        const last = h[h.length - 1], prev = h[h.length - 2];
+        const stale = !last || now - last[0] > 2 * H;
+        vm.rain.push({ name: s.name, km: s.km, dir: bearing(HOME, s), r24: s.r24, last: last ? last[1] : null, prev: prev ? prev[1] : null, time: last ? last[0] : null, stale, hourly: h });
+      }
+    }
+
+    if (raw.forecast) {
+      const f = raw.forecast;
+      const past = f.filter(p => p[0] <= now), fut = f.filter(p => p[0] > now);
+      const sum = a => a.reduce((s, p) => s + (p[1] || 0), 0);
+      vm.forecast = { series: f, now, past2h: sum(past), next3h: sum(fut), peak: Math.max(0, ...fut.map(p => (p[1] || 0) * 4)) };
+    }
+
+    // ป้ายสถานะ
+    const reasons = [];
+    let level = "ok";
+    const bump = l => { const o = { ok: 0, watch: 1, alert: 2 }; if (o[l] > o[level]) level = l; };
+    for (const r of vm.roads) {
+      if (r.stale || r.depth == null) continue;
+      if (r.km <= 3.5 && r.depth > 10) { bump("alert"); reasons.push(`${r.name} น้ำท่วม ${r.depth} ซม.`); }
+      else if (r.depth >= 3) { bump("watch"); reasons.push(`${r.name} มีน้ำขัง ${r.depth} ซม.`); }
+    }
+    // ประตูน้ำแถวบ้านแตะตลิ่งด้านต่ำเกือบทุกรอบน้ำหนุน → เตือนเฉพาะเมื่อน้ำหนุนอธิบายไม่ได้ หรือเกินตลิ่งทั้งสองฝั่ง
+    for (const r of vm.rivers) {
+      if (r.stale || r.margin == null) continue;
+      const tideExplains = r.why && r.why.cls === "ok";
+      if (r.highBank != null && r.level >= r.highBank) { bump("watch"); reasons.push(`${r.name} น้ำสูงเกินตลิ่งทั้งสองฝั่ง`); }
+      else if (r.margin <= 0 && !tideExplains) { bump("watch"); reasons.push(`${r.name} น้ำเกินตลิ่งด้านต่ำ ${-r.margin} ซม.`); }
+      else if (r.margin > 0 && r.margin < 20 && r.d1h > 0 && !tideExplains) { bump("watch"); reasons.push(`${r.name} อีก ${r.margin} ซม. ถึงตลิ่ง และกำลังขึ้น`); }
+      if (r.why && r.why.cls === "alert") { bump("watch"); reasons.push(`${r.name} ${r.why.text}`); }
+    }
+    for (const r of vm.rain) if (!r.stale && r.last >= 20) { bump("watch"); reasons.push(`ฝนหนักที่${r.name} ${r.last} มม./ชม.`); }
+    if (vm.forecast && vm.forecast.next3h >= 20) { bump("watch"); reasons.push(`คาดว่าฝนจะตก ${vm.forecast.next3h.toFixed(0)} มม. ใน 3 ชม.`); }
+    const anyFresh = vm.roads.some(r => !r.stale) || vm.rivers.some(r => !r.stale);
+    vm.level = anyFresh ? level : "stale";
+    vm.reasons = reasons;
+    return vm;
+  }
+
+  return { collect, analyze, HOME };
+})();
+</script>
+
+<script>
+window.__SNAPSHOT__ = /*SNAPSHOT*/null/*END*/;
+
+(() => {
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const H = 3600e3;
+  const hm = t => new Date(t).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Bangkok" });
+  const dayHm = t => {
+    const d = new Date(t), today = new Date();
+    const same = d.toLocaleDateString("th-TH", { timeZone: "Asia/Bangkok" }) === today.toLocaleDateString("th-TH", { timeZone: "Asia/Bangkok" });
+    return (same ? "" : d.toLocaleDateString("th-TH", { day: "numeric", month: "short", timeZone: "Asia/Bangkok" }) + " ") + hm(t);
+  };
+  const ago = t => { const m = Math.round((Date.now() - t) / 60e3); return m < 1 ? "เมื่อสักครู่" : m < 60 ? `${m} นาทีที่แล้ว` : `${Math.floor(m / 60)} ชม. ${m % 60} นาทีที่แล้ว`; };
+  const sgn = (v, d = 0) => (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(v).toFixed(d);
+  const deltaHtml = (d, unit, stale, dec = 0, per = "/ชม.") => {
+    if (stale) return `<span class="delta stale">ข้อมูลค้าง</span>`;
+    if (d == null) return `<span class="delta flat">—</span>`;
+    const th = dec ? 0.05 : 1;
+    if (Math.abs(d) < th) return `<span class="delta flat">→ คงที่</span>`;
+    return `<span class="delta ${d > 0 ? "up" : "down"}">${d > 0 ? "↑" : "↓"} ${sgn(d, dec)} ${unit}${per}</span>`;
+  };
+
+  function spark(series, { w = 600, h = 40, min = 0, max, color = "var(--accent)", from, to } = {}) {
+    if (!series || series.length < 2) return "";
+    const t0 = from ?? series[0][0], t1 = to ?? series[series.length - 1][0];
+    const vmax = max ?? Math.max(...series.map(p => p[1]), min + 1);
+    const vmin = min;
+    const X = t => ((t - t0) / (t1 - t0)) * w, Y = v => h - 2 - ((v - vmin) / (vmax - vmin || 1)) * (h - 6);
+    const pts = series.map(p => `${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`);
+    const last = series[series.length - 1];
+    return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true" style="height:${h}px">
+      <polygon points="0,${h} ${pts.join(" ")} ${X(last[0]).toFixed(1)},${h}" fill="${color}" fill-opacity=".12"/>
+      <polyline points="${pts.join(" ")}" fill="none" stroke="${color}" stroke-width="2" vector-effect="non-scaling-stroke"/>
+    </svg>`;
+  }
+
+  function renderTide(vm) {
+    const box = $("tideChart");
+    if (!vm.tide) { box.innerHTML = `<div class="loading">ดึงข้อมูลน้ำทะเลหนุนไม่ได้</div>`; return; }
+    const W = 440, Hh = 230, L = 30, R = 8, T = 14, B = 24;
+    const t0 = vm.at - 18 * H, t1 = vm.at + 30 * H;
+    const tide = vm.tide.series.filter(p => p[0] >= t0 && p[0] <= t1);
+    const gauge = vm.rivers.find(r => !r.stale && r.series && r.series.length > 10) || vm.rivers.find(r => r.series && r.series.length);
+    const gpts = gauge ? gauge.series.filter(p => p[0] >= t0) : [];
+    const vals = [...tide.map(p => p[1]), ...gpts.map(p => p[1])];
+    if (gauge && gauge.bank != null) vals.push(gauge.bank);
+    const vmin = Math.floor(Math.min(...vals) * 2) / 2, vmax = Math.ceil(Math.max(...vals) * 2) / 2;
+    const X = t => L + ((t - t0) / (t1 - t0)) * (W - L - R);
+    const Y = v => T + (1 - (v - vmin) / (vmax - vmin)) * (Hh - T - B);
+    let g = "";
+    for (let v = vmin; v <= vmax + 1e-9; v += 0.5) {
+      g += `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" stroke-width="1"/>`;
+      g += `<text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end">${v.toFixed(1)}</text>`;
+    }
+    const firstTick = Math.ceil((t0 + 7 * H) / (6 * H)) * 6 * H - 7 * H;
+    for (let t = firstTick; t <= t1; t += 6 * H) {
+      const lab = new Date(t).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Bangkok" });
+      g += `<line x1="${X(t)}" x2="${X(t)}" y1="${T}" y2="${Hh - B}" stroke="var(--line)" stroke-dasharray="2 4"/>`;
+      g += `<text x="${X(t)}" y="${Hh - 8}" text-anchor="middle">${lab}</text>`;
+    }
+    if (gauge && gauge.bank != null) {
+      g += `<line x1="${L}" x2="${W - R}" y1="${Y(gauge.bank)}" y2="${Y(gauge.bank)}" stroke="var(--alert)" stroke-width="1.5" stroke-dasharray="6 4"/>`;
+      g += `<text x="${W - R}" y="${Y(gauge.bank) - 5}" text-anchor="end" style="fill:var(--alert)">ตลิ่งด้านต่ำ ${gauge.bank.toFixed(2)} ม.</text>`;
+    }
+    const line = tide.map(p => `${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join(" ");
+    g += `<polyline points="${line}" fill="none" stroke="var(--tide)" stroke-width="2.5" stroke-linejoin="round"/>`;
+    for (const p of gpts) g += `<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="1.8" fill="var(--gauge)"/>`;
+    for (const e of vm.tide.next.concat(vm.tide.past)) if (e.t >= t0 && e.t <= t1 && e.kind === "high") {
+      g += `<circle cx="${X(e.t)}" cy="${Y(e.v)}" r="4" fill="var(--surface)" stroke="var(--tide)" stroke-width="2"/>`;
+    }
+    g += `<line x1="${X(vm.at)}" x2="${X(vm.at)}" y1="${T}" y2="${Hh - B}" stroke="var(--ink)" stroke-width="1.5"/>`;
+    g += `<text x="${X(vm.at) + 4}" y="${T + 10}" style="fill:var(--ink);font-weight:600">ตอนนี้</text>`;
+    box.className = "";
+    box.innerHTML = `<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="กราฟน้ำทะเลหนุนเทียบระดับน้ำจริง">${g}</svg></div>`;
+    $("tideLegend").innerHTML = `<span style="--c:var(--tide)">น้ำทะเลหนุนที่ปากแม่น้ำ (ม. รทก.)</span>` +
+      (gauge ? `<span style="--c:var(--gauge)">ระดับจริง ${esc(gauge.name)}</span>` : "");
+    $("tideTimes").innerHTML = vm.tide.localNext.slice(0, 4).map(e =>
+      `<div>${e.kind === "high" ? "น้ำขึ้นสูงสุด" : "น้ำลงต่ำสุด"} <b class="num">${dayHm(e.t)}</b> <span class="num">${e.v.toFixed(2)} ม.</span></div>`).join("") +
+      `<div style="border:0;background:none;color:var(--muted)">เวลาเป็นของแถวบ้าน: ช้ากว่าปากแม่น้ำราว ${Math.round(vm.tide.lag / 60e3)} นาที ${vm.tide.lagFitted ? "(คำนวณจากระดับน้ำจริง 24 ชม.)" : "(ค่าประมาณ)"} · ระดับเป็นของปากแม่น้ำ</div>`;
+  }
+
+  function renderRoads(vm) {
+    if (!vm.roads.length) { $("roads").innerHTML = `<div class="loading">ดึงข้อมูลเซ็นเซอร์ กทม. ไม่ได้</div>`; return; }
+    $("roads").innerHTML = vm.roads.map(r => {
+      const cls = r.stale || r.depth == null ? "" : r.depth > 10 ? "alert" : r.depth >= 3 ? "watch" : "ok";
+      const label = r.broken ? "เครื่องขัดข้อง" : r.stale ? "ข้อมูลค้าง" : r.depth > 10 ? "น้ำท่วม" : r.depth >= 3 ? "น้ำขังเล็กน้อย" : "แห้ง";
+      return `<div class="row">
+        <div class="name">${esc(r.name)}</div>
+        <div class="val"><span class="big">${r.depth == null ? "—" : r.depth.toFixed(0)}<small>ซม.</small></span>${deltaHtml(r.d1h, "ซม.", r.stale)}</div>
+        <div class="info">${r.km.toFixed(1)} กม. ทาง${r.dir} · ${esc(r.district || "")} · วัดเมื่อ ${r.time ? hm(r.time) : "—"}
+          · สูงสุด 6 ชม. ${r.peak.toFixed(0)} ซม. · <a href="https://floodbangkok.bangkok.go.th/device-info?sensor_profile_id=${encodeURIComponent(r.code)}" target="_blank" rel="noopener">ประวัติจุดนี้ (กทม.)</a><br>
+          <span class="tag ${cls}">${label}</span></div>
+        <div class="spark">${spark(r.series, { max: Math.max(20, r.peak + 5), from: vm.at - 6 * H, to: vm.at, color: cls === "alert" ? "var(--alert)" : "var(--accent)" })}</div>
+      </div>`;
+    }).join("");
+  }
+
+  function renderRivers(vm) {
+    if (!vm.rivers.length) { $("rivers").innerHTML = `<div class="loading">ดึงข้อมูล ThaiWater ไม่ได้</div>`; return; }
+    $("rivers").innerHTML = vm.rivers.map(r => {
+      const pct = r.level != null && r.bank ? Math.max(0, Math.min(100, ((r.level + 1.5) / (r.bank + 1.5)) * 92)) : 0;
+      const marginTxt = r.margin == null ? "" : r.margin > 0 ? `อีก <b class="num">${r.margin}</b> ซม. ถึงตลิ่งด้านต่ำ` : `<b>สูงกว่าตลิ่งด้านต่ำ ${-r.margin} ซม.</b>${r.highBank != null && r.level < r.highBank ? ` (ยังต่ำกว่าตลิ่งอีกฝั่ง ${Math.round((r.highBank - r.level) * 100)} ซม.)` : ""}`;
+      const eta = r.eta != null && r.eta < 12 ? ` · ถ้าขึ้นเท่านี้ต่อไป ถึงตลิ่งในราว ${r.eta < 1 ? "ไม่ถึง 1" : r.eta.toFixed(0)} ชม. (ประมาณ)` : "";
+      return `<div class="row">
+        <div class="name">${esc(r.name)}</div>
+        <div class="val"><span class="big">${r.level == null ? "—" : r.level.toFixed(2)}<small>ม.</small></span>${deltaHtml(r.d1h, "ซม.", r.stale)}</div>
+        <div class="info">${r.km.toFixed(1)} กม. ทาง${r.dir} · วัดเมื่อ ${r.time ? dayHm(r.time) : "—"} · ${marginTxt}${eta}<br>
+          ${r.why ? `<span class="tag ${r.why.cls}">${r.why.text}</span>` : r.stale ? `<span class="tag">ข้อมูลค้าง — ไม่นำมาคิดแนวโน้ม</span>` : ""}</div>
+        ${r.stale ? "" : `<div class="gaugebar" title="ระดับน้ำเทียบตลิ่ง"><i style="width:${pct}%"></i><b style="left:92%"></b></div>
+        <div class="spark">${spark(r.series.filter(p => p[0] >= vm.at - 24 * H), { min: Math.min(...r.series.map(p => p[1])) - 0.1, max: Math.max(r.bank || 0, ...r.series.map(p => p[1])) + 0.05, from: vm.at - 24 * H, to: vm.at })}</div>`}
+      </div>`;
+    }).join("");
+  }
+
+  function renderRain(vm) {
+    let html = "";
+    if (vm.forecast) {
+      const f = vm.forecast, mx = Math.max(1, ...f.series.map(p => p[1] || 0));
+      html += `<div class="row">
+        <div class="name">ที่บ้าน (คาดการณ์)</div>
+        <div class="val"><span class="big">${f.next3h.toFixed(1)}<small>มม.</small></span><span class="delta flat">3 ชม.ข้างหน้า</span></div>
+        <div class="info">2 ชม.ที่ผ่านมา ${f.past2h.toFixed(1)} มม. · แรงสุดช่วงถัดไป ${f.peak.toFixed(1)} มม./ชม. · แท่งเทา = ที่ผ่านมา</div>
+      </div>
+      <div class="forecast" aria-hidden="true">${f.series.map(p => `<i class="${p[0] <= f.now ? "past" : ""}" style="height:${((p[1] || 0) / mx) * 100}%"></i>`).join("")}</div>`;
+    }
+    html += vm.rain.map(r => {
+      const d = r.last != null && r.prev != null ? r.last - r.prev : null;
+      return `<div class="row">
+        <div class="name">${esc(r.name)}</div>
+        <div class="val"><span class="big">${r.last == null ? "—" : r.last.toFixed(1)}<small>มม.</small></span>${deltaHtml(d, "มม.", r.stale, 1, " จากชม.ก่อน")}</div>
+        <div class="info">${r.km.toFixed(1)} กม. ทาง${r.dir} · ชั่วโมงล่าสุด ${r.time ? hm(r.time) : "—"} · ชั่วโมงก่อนหน้า ${r.prev == null ? "—" : r.prev.toFixed(1)} มม. · 24 ชม. ${r.r24 == null ? "—" : r.r24} มม.</div>
+      </div>`;
+    }).join("");
+    $("rain").innerHTML = html || `<div class="loading">ดึงข้อมูลฝนไม่ได้</div>`;
+  }
+
+  function renderStatus(vm, mode) {
+    const words = { ok: "ปกติ ไม่มีน้ำท่วมใกล้บ้าน", watch: "เฝ้าระวัง", alert: "มีน้ำท่วมใกล้บ้าน", stale: "ข้อมูลไม่สด" };
+    $("status").dataset.level = vm.level;
+    $("statusWord").textContent = words[vm.level];
+    const lines = [];
+    // ถนน
+    const wet = vm.roads.filter(r => !r.stale && r.depth >= 3).sort((a, b) => b.depth - a.depth);
+    const nearRoad = vm.roads.find(r => !r.stale);
+    if (wet.length) lines.push(`ถนน: ${esc(wet[0].name)} น้ำ ${wet[0].depth} ซม.${wet[0].d1h ? ` (${sgn(wet[0].d1h)} ซม. ใน 1 ชม.)` : ""} · ${wet[0].km.toFixed(1)} กม.`);
+    else if (nearRoad) lines.push(`ถนน: ไม่มีน้ำขัง · ใกล้สุด ${esc(nearRoad.name)} ${nearRoad.km.toFixed(1)} กม.`);
+    // แม่น้ำ
+    const river = vm.rivers.find(r => !r.stale && r.d1h != null);
+    if (river) {
+      const verb = Math.abs(river.d1h) < 2 ? "ทรงตัว" : river.d1h > 0 ? `กำลังขึ้น ${sgn(river.d1h)} ซม. ใน 1 ชม.` : `กำลังลด ${sgn(river.d1h)} ซม. ใน 1 ชม.`;
+      const why = river.why && river.d1h >= 2 ? (river.why.cls === "ok" ? " ตามน้ำทะเลหนุน" : river.why.cls === "alert" ? " ทั้งที่น้ำทะเลกำลังลง" : "") : "";
+      lines.push(`น้ำ: ${esc(river.name)} ${verb}${why} · ${river.margin > 0 ? `อีก ${river.margin} ซม. ถึงตลิ่ง` : `เกินตลิ่งด้านต่ำ ${-river.margin} ซม.`}`);
+    }
+    // ฝน
+    const rr = vm.rain.find(r => !r.stale && r.last != null);
+    if (rr || vm.forecast) {
+      const parts = [];
+      if (rr) parts.push(`ชั่วโมงล่าสุด ${rr.last.toFixed(1)} มม.${rr.prev != null ? ` (ก่อนหน้า ${rr.prev.toFixed(1)})` : ""}`);
+      if (vm.forecast) parts.push(`3 ชม.ข้างหน้าคาด ${vm.forecast.next3h.toFixed(1)} มม.`);
+      lines.push(`ฝน: ${parts.join(" · ")}`);
+    }
+    // น้ำทะเลหนุน
+    const hi = vm.tide && vm.tide.localNext.find(e => e.kind === "high");
+    if (hi) lines.push(`น้ำหนุนแถวบ้าน${vm.tide.localRising ? "กำลังขึ้น" : "กำลังลง"} · ขึ้นสูงสุดครั้งถัดไปราว ${dayHm(hi.t)}`);
+    for (const r of vm.reasons.slice(0, 3)) if (vm.level !== "ok") lines.unshift(`⚠ ${esc(r)}`);
+    $("summary").innerHTML = lines.map(l => `<li>${l}</li>`).join("");
+    $("updated").textContent = (mode === "live" ? "ข้อมูลสด · ดึงเมื่อ " : "ภาพนิ่ง ณ ") + dayHm(vm.at) + ` (${ago(vm.at)})`;
+
+    const age = Date.now() - vm.at, banner = $("banner");
+    if (mode === "snapshot" && age > 30 * 60e3) {
+      banner.hidden = false;
+      banner.textContent = `ข้อมูลชุดนี้ดึงไว้เมื่อ ${dayHm(vm.at)} อาจไม่ใช่สถานการณ์ตอนนี้ ดูค่าล่าสุดได้ที่ลิงก์ ระบบตรวจวัดน้ำท่วมถนน กทม. ท้ายหน้า`;
+    } else if (vm.errors.length) {
+      banner.hidden = false;
+      banner.textContent = "บางแหล่งดึงข้อมูลไม่ได้รอบนี้ ส่วนที่เหลือยังแสดงตามปกติ";
+    } else banner.hidden = true;
+  }
+
+  function render(raw, mode) {
+    const vm = Core.analyze(raw);
+    renderStatus(vm, mode); renderTide(vm); renderRoads(vm); renderRivers(vm); renderRain(vm);
+  }
+
+  const getJson = async url => {
+    const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 15000);
+    try { const r = await fetch(url, { signal: ctl.signal }); if (!r.ok) throw new Error(r.status); return await r.json(); }
+    finally { clearTimeout(to); }
+  };
+
+  async function load() {
+    $("refreshBtn").hidden = true;
+    let raw = null;
+    try {
+      raw = await Core.collect(getJson);
+      const got = ["bma", "tw", "rain", "forecast", "tide"].filter(k => raw[k]).length;
+      if (got < 2) raw = null; // ดึงสดไม่ได้ (เช่นเปิดใน Artifact) → ใช้ภาพนิ่ง
+    } catch (e) { raw = null; }
+    if (raw) { render(raw, "live"); $("refreshBtn").hidden = false; return true; }
+    if (window.__SNAPSHOT__) { render(window.__SNAPSHOT__, "snapshot"); return false; }
+    $("statusWord").textContent = "ดึงข้อมูลไม่ได้";
+    return false;
+  }
+
+  $("refreshBtn").addEventListener("click", load);
+  load().then(live => { if (live) setInterval(load, 5 * 60e3); });
+})();
+</script>

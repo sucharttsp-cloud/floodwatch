@@ -1,0 +1,13 @@
+# วางใน Container Manager → Project → สร้าง · path: /volume1/docker/floodwatch
+# เป็นแค่ไฟล์ HTML ไฟล์เดียว ข้อมูลดึงสดจากมือถือคนเปิดเอง ไม่มีความลับ ไม่มีฐานข้อมูล
+services:
+  floodwatch:
+    image: nginx:1.27-alpine
+    container_name: floodwatch
+    ports:
+      - "8090:80"
+    volumes:
+      - ./html:/usr/share/nginx/html:ro
+    environment:
+      - TZ=Asia/Bangkok
+    restart: unless-stopped
