@@ -9,6 +9,11 @@ const EVERY = (+process.env.CHECK_MINUTES || 5) * 60e3;
 const COOLDOWN = 3 * 3600e3; // เงื่อนไขเดิมกลับมาภายใน 3 ชม. ไม่ส่งซ้ำ
 const STATE = process.env.STATE_FILE || "/data/state.json";
 const PAGE = process.env.PAGE_FILE || "/site/index.html";
+// สั่งให้ GitHub Actions ดึง ThaiWater + deploy หน้าเว็บสาธารณะ (งานตั้งเวลาของ GitHub ไม่ค่อยรันตามเวลา)
+// ทุก 10 นาที = 6 ครั้ง/ชม. ต่ำกว่าเพดาน deploy ของ GitHub Pages
+const GH_TOKEN = (process.env.GITHUB_DISPATCH_TOKEN || "").trim();
+const GH_EVERY = 10 * 60e3;
+let lastDispatch = 0;
 
 const log = (...a) => console.log(new Date().toLocaleString("th-TH", { timeZone: "Asia/Bangkok" }), ...a);
 const hm = t => new Date(t).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Bangkok" });
@@ -89,8 +94,20 @@ async function check() {
   log("level", vm.level, "active", Object.keys(active).join(",") || "-", fresh.length ? "ส่งใหม่ " + fresh.join(",") : "");
 }
 
-log(`เริ่มทำงาน เช็คทุก ${EVERY / 60e3} นาที · token ${TOKEN ? "มีแล้ว" : "ยังไม่ได้ใส่"}`);
+async function dispatchPages() {
+  if (!GH_TOKEN || Date.now() - lastDispatch < GH_EVERY) return;
+  lastDispatch = Date.now();
+  const r = await fetch("https://api.github.com/repos/sucharttsp-cloud/floodwatch/actions/workflows/pages.yml/dispatches", {
+    method: "POST",
+    headers: { Accept: "application/vnd.github+json", Authorization: "Bearer " + GH_TOKEN, "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "floodwatch-nas" },
+    body: JSON.stringify({ ref: "main" })
+  });
+  if (r.status !== 204) log("สั่ง GitHub อัปเดตไม่สำเร็จ", r.status, (await r.text()).slice(0, 200));
+}
+
+log(`เริ่มทำงาน เช็คทุก ${EVERY / 60e3} นาที · LINE token ${TOKEN ? "มีแล้ว" : "ยังไม่ได้ใส่"} · GitHub token ${GH_TOKEN ? "มีแล้ว (สั่งอัปเดตหน้าเว็บทุก 10 นาที)" : "ยังไม่ได้ใส่"}`);
 for (;;) {
+  try { await dispatchPages(); } catch (e) { log("สั่ง GitHub ผิดพลาด:", e && e.message || e); }
   try { await check(); } catch (e) { log("ผิดพลาด:", e && e.message || e); }
   await new Promise(r => setTimeout(r, EVERY));
 }

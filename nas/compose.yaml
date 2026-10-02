@@ -26,4 +26,6 @@ services:
       - CHECK_MINUTES=5
       # วางรหัส Channel access token (long-lived) จาก LINE Developers แทนข้อความในเครื่องหมายคำพูด
       - LINE_CHANNEL_ACCESS_TOKEN=
+      # Fine-grained token ของ GitHub (repo floodwatch · สิทธิ์ Actions: Read and write) ให้ NAS สั่งอัปเดตหน้าเว็บสาธารณะ
+      - GITHUB_DISPATCH_TOKEN=
     restart: unless-stopped
