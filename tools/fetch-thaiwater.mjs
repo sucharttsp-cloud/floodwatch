@@ -1,4 +1,4 @@
-// ดึงระดับน้ำ + ฝนจาก ThaiWater ฝั่งเซิร์ฟเวอร์ (รันใน GitHub Actions ทุก 15 นาที)
+// ดึงระดับน้ำ + ฝนจาก ThaiWater ฝั่งเซิร์ฟเวอร์ (รันใน GitHub Actions ทุก 5 นาที)
 // ThaiWater ตอบ 429 ให้หน้าเว็บที่เปิดจากโดเมนภายนอก หน้าบน GitHub Pages เลยอ่านไฟล์นี้แทน
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
