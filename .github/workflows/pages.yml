@@ -5,13 +5,18 @@ on:
   schedule:
     - cron: "*/5 * * * *"
   workflow_dispatch:
+    inputs:
+      test:
+        description: "ส่งข้อความทดสอบเข้า LINE"
+        type: boolean
+        default: false
 permissions:
   contents: read
   pages: write
   id-token: write
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -23,8 +28,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: ดึงข้อมูล ThaiWater
-        run: node tools/fetch-thaiwater.mjs
+      - name: ดึง ThaiWater + เช็คแจ้งเตือน LINE
+        run: node tools/update.mjs
+        env:
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          ALERT_TEST: ${{ inputs.test }}
       - name: copy หน้า
         run: cp page.html docs/index.html
       - uses: actions/upload-pages-artifact@v3
