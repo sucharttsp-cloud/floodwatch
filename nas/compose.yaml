@@ -1,7 +1,7 @@
-# วางใน Container Manager → Project → สร้าง · path: /volume1/docker/floodwatch
-# เป็นแค่ไฟล์ HTML ไฟล์เดียว ข้อมูลดึงสดจากมือถือคนเปิดเอง ไม่มีความลับ ไม่มีฐานข้อมูล
+# Container Manager → Project floodwatch · path: /volume1/docker/floodwatch
 services:
   floodwatch:
+    # หน้าเว็บ (ไฟล์ HTML ไฟล์เดียว ข้อมูลดึงสดจากมือถือคนเปิดเอง)
     image: nginx:1.27-alpine
     container_name: floodwatch
     ports:
@@ -10,4 +10,20 @@ services:
       - ./html:/usr/share/nginx/html:ro
     environment:
       - TZ=Asia/Bangkok
+    restart: unless-stopped
+
+  floodwatch-alert:
+    # แจ้งเตือน LINE ทุก 5 นาที ใช้กฎจาก html/index.html ตัวเดียวกับหน้าเว็บ
+    image: node:20-alpine
+    container_name: floodwatch-alert
+    command: node /app/alert.mjs
+    volumes:
+      - ./alert:/app:ro
+      - ./html:/site:ro
+      - ./data:/data
+    environment:
+      - TZ=Asia/Bangkok
+      - CHECK_MINUTES=5
+      # วางรหัส Channel access token (long-lived) จาก LINE Developers แทนข้อความในเครื่องหมายคำพูด
+      - LINE_CHANNEL_ACCESS_TOKEN=
     restart: unless-stopped
