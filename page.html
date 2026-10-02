@@ -161,9 +161,15 @@ const Core = (() => {
   const ymd = ms => new Date(ms + 7 * H).toISOString().slice(0, 10);
 
   // ดึงข้อมูลดิบทั้งหมด (ใช้ทั้งในหน้าเว็บและตอนสร้างภาพนิ่ง)
-  async function collect(getJson, now = Date.now()) {
+  // fallback(key): ทางสำรองเมื่อดึงสดไม่ได้ เช่นไฟล์ที่ GitHub Actions ดึงจาก ThaiWater ไว้ให้ (ThaiWater ตอบ 429 กับหน้าเว็บโดเมนภายนอก)
+  async function collect(getJson, now = Date.now(), fallback = null) {
     const out = { at: now, home: HOME, errors: [] };
-    const safe = async (key, fn) => { try { out[key] = await fn(); } catch (e) { out.errors.push(key + ": " + (e && e.message || e)); } };
+    const safe = async (key, fn) => {
+      try { out[key] = await fn(); return; } catch (e) {
+        if (fallback) { try { const v = await fallback(key); if (v) { out[key] = v; return; } } catch (e2) { /* ไม่มีไฟล์สำรอง */ } }
+        out.errors.push(key + ": " + (e && e.message || e));
+      }
+    };
 
     await Promise.all([
       safe("bma", async () => {
@@ -574,8 +580,14 @@ window.__SNAPSHOT__ = /*SNAPSHOT*/null/*END*/;
   async function load() {
     $("refreshBtn").hidden = true;
     let raw = null;
+    let mirror = null;
+    const fallback = async key => {
+      if (!["tw", "rain"].includes(key)) return null;
+      mirror = mirror || getJson("data/thaiwater.json?t=" + Date.now());
+      return (await mirror)[key];
+    };
     try {
-      raw = await Core.collect(getJson);
+      raw = await Core.collect(getJson, Date.now(), fallback);
       const got = PARTS.filter(k => raw[k]).length;
       if (got === 0) raw = null; // ดึงสดไม่ได้เลย (เช่นเปิดใน Artifact) → ใช้ภาพนิ่ง
     } catch (e) { raw = null; }
